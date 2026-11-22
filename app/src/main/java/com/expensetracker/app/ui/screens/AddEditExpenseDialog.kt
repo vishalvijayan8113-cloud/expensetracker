@@ -1,11 +1,9 @@
 package com.expensetracker.app.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -13,12 +11,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -27,7 +21,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.expensetracker.app.data.db.Expense
 import com.expensetracker.app.utils.CategoryMapper
-import com.expensetracker.app.utils.DateUtils
 
 @Composable
 fun AddEditExpenseDialog(
@@ -35,14 +28,17 @@ fun AddEditExpenseDialog(
     onSave: (amount: Double, note: String, category: String, merchant: String) -> Unit,
     onDismiss: () -> Unit
 ) {
-    var amountText by remember { mutableStateOf(existingExpense?.amount?.let {
-        if (it == it.toLong().toDouble()) it.toLong().toString() else "%.2f".format(it)
-    } ?: "") }
+    var amountText by remember {
+        mutableStateOf(
+            if (existingExpense != null) {
+                val a = existingExpense.amount
+                if (a == a.toLong().toDouble()) a.toLong().toString() else "%.2f".format(a)
+            } else ""
+        )
+    }
     var note by remember { mutableStateOf(existingExpense?.note ?: "") }
     var selectedCategory by remember { mutableStateOf(existingExpense?.category ?: "Other") }
     var merchant by remember { mutableStateOf(existingExpense?.merchantOrSource ?: "") }
-    val focusRequester = remember { FocusRequester() }
-    val keyboard = LocalSoftwareKeyboardController.current
     var amountError by remember { mutableStateOf(false) }
 
     LaunchedEffect(note) {
@@ -82,32 +78,32 @@ fun AddEditExpenseDialog(
 
                 OutlinedTextField(
                     value = amountText,
-                    onValueChange = {
-                        amountText = it
-                        amountError = false
-                    },
-                    label = { Text("Amount (₹)") },
+                    onValueChange = { amountText = it; amountError = false },
+                    label = { Text("Amount (Rs.)") },
                     placeholder = { Text("0.00") },
                     isError = amountError,
-                    supportingText = if (amountError) {{ Text("Enter a valid amount") }} else null,
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     singleLine = true,
                     shape = RoundedCornerShape(12.dp)
                 )
+                if (amountError) {
+                    Text(
+                        text = "Enter a valid amount",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                }
 
                 OutlinedTextField(
                     value = note,
                     onValueChange = { note = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focusRequester),
+                    modifier = Modifier.fillMaxWidth(),
                     label = { Text("Description") },
                     placeholder = { Text("e.g., water, petrol, grocery...") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
-                        capitalization = KeyboardCapitalization.Sentences,
-                        imeAction = ImeAction.Next
+                        capitalization = KeyboardCapitalization.Sentences
                     ),
                     shape = RoundedCornerShape(12.dp)
                 )
@@ -132,7 +128,7 @@ fun AddEditExpenseDialog(
                         FilterChip(
                             selected = isSelected,
                             onClick = { selectedCategory = cat },
-                            label = { Text("${CategoryMapper.categoryIcon(cat)} $cat", fontSize = 12.sp) },
+                            label = { Text(cat, fontSize = 12.sp) },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = MaterialTheme.colorScheme.primary,
                                 selectedLabelColor = Color.White

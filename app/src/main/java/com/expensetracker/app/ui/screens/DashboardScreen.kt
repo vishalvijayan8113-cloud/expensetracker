@@ -8,12 +8,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -38,36 +42,24 @@ fun DashboardScreen(
     var showAddDialog by remember { mutableStateOf(false) }
     var editingExpense by remember { mutableStateOf<Expense?>(null) }
 
-    // Permission states — recheck on each recomposition so banners auto-dismiss
-    val hasNotificationAccess = remember(uiState) {
-        isNotificationListenerEnabled(context)
-    }
-    val hasOverlayPermission = remember(uiState) {
-        Settings.canDrawOverlays(context)
-    }
+    val hasNotificationAccess = remember(uiState) { isNotificationListenerEnabled(context) }
+    val hasOverlayPermission = remember(uiState) { Settings.canDrawOverlays(context) }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = {
-                    Text(
-                        "Expense Tracker",
-                        fontWeight = FontWeight.Bold
-                    )
-                },
+                title = { Text("Expense Tracker", fontWeight = FontWeight.Bold) },
                 actions = {
-                    // Simulate payment button
                     TextButton(
-                        onClick = {
-                            simulatePayment(context, 20.0, "Google Pay")
-                        },
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.primary
-                        )
+                        onClick = { simulatePayment(context, 20.0, "Google Pay") }
                     ) {
-                        Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
+                        Icon(
+                            Icons.Default.PlayArrow,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp)
+                        )
                         Spacer(Modifier.width(4.dp))
-                        Text("Test ₹20", fontSize = 13.sp)
+                        Text("Test Rs.20", fontSize = 13.sp)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -92,7 +84,6 @@ fun DashboardScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Permission banners
             if (!hasNotificationAccess) {
                 item {
                     PermissionBannerCard(
@@ -119,8 +110,8 @@ fun DashboardScreen(
                         title = "Allow Display Over Other Apps",
                         description = "Required to show the quick-entry popup over your screen.",
                         buttonText = "Grant Permission",
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
                         onClick = {
                             val intent = Intent(
                                 Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -132,7 +123,6 @@ fun DashboardScreen(
                 }
             }
 
-            // Summary cards row
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -153,7 +143,6 @@ fun DashboardScreen(
                 }
             }
 
-            // Category breakdown
             if (uiState.categoryBreakdown.isNotEmpty()) {
                 item {
                     CategoryBreakdownCard(
@@ -163,7 +152,6 @@ fun DashboardScreen(
                 }
             }
 
-            // Recent transactions header
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -190,14 +178,9 @@ fun DashboardScreen(
                     }
                 }
             } else if (uiState.expenses.isEmpty()) {
-                item {
-                    EmptyStateCard()
-                }
+                item { EmptyStateCard() }
             } else {
-                items(
-                    items = uiState.expenses,
-                    key = { it.id }
-                ) { expense ->
+                items(items = uiState.expenses, key = { it.id }) { expense ->
                     ExpenseListItem(
                         expense = expense,
                         onEdit = { editingExpense = it },
@@ -206,12 +189,10 @@ fun DashboardScreen(
                 }
             }
 
-            // Bottom padding for FAB
             item { Spacer(Modifier.height(72.dp)) }
         }
     }
 
-    // Add Dialog
     if (showAddDialog) {
         AddEditExpenseDialog(
             onSave = { amount, note, category, merchant ->
@@ -221,7 +202,6 @@ fun DashboardScreen(
         )
     }
 
-    // Edit Dialog
     editingExpense?.let { expense ->
         AddEditExpenseDialog(
             existingExpense = expense,
@@ -242,7 +222,7 @@ fun DashboardScreen(
 
 @Composable
 fun PermissionBannerCard(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     title: String,
     description: String,
     buttonText: String,
@@ -284,9 +264,7 @@ fun EmptyStateCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         Column(
             modifier = Modifier
@@ -295,15 +273,9 @@ fun EmptyStateCard() {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("💸", fontSize = 48.sp)
+            Text("No expenses yet", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             Text(
-                "No expenses yet",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                "Tap + to add one, or tap 'Test ₹20' to try the popup!",
+                "Tap + to add one, or tap 'Test Rs.20' to try the popup!",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -322,7 +294,7 @@ private fun simulatePayment(context: Context, amount: Double, merchant: String) 
         flags = Intent.FLAG_ACTIVITY_NEW_TASK
         putExtra(PaymentNotificationListenerService.EXTRA_AMOUNT, amount)
         putExtra(PaymentNotificationListenerService.EXTRA_MERCHANT, merchant)
-        putExtra(PaymentNotificationListenerService.EXTRA_RAW_TEXT, "Simulated payment of ₹$amount via $merchant")
+        putExtra(PaymentNotificationListenerService.EXTRA_RAW_TEXT, "Simulated payment of Rs.$amount via $merchant")
     }
     context.startActivity(intent)
 }

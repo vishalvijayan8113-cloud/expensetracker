@@ -9,9 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.expensetracker.app.data.db.CategoryTotal
-import com.expensetracker.app.utils.CategoryMapper
 import com.expensetracker.app.utils.DateUtils
 
 @Composable
@@ -69,7 +67,6 @@ fun CategoryBreakdownCard(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
-
             breakdown.forEach { item ->
                 val fraction = if (monthTotal > 0) (item.total / monthTotal).toFloat() else 0f
                 CategoryProgressRow(
@@ -83,13 +80,8 @@ fun CategoryBreakdownCard(
 }
 
 @Composable
-fun CategoryProgressRow(
-    category: String,
-    amount: Double,
-    fraction: Float
-) {
+fun CategoryProgressRow(category: String, amount: Double, fraction: Float) {
     val color = categoryColor(category)
-
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -97,7 +89,7 @@ fun CategoryProgressRow(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "${CategoryMapper.categoryIcon(category)} $category",
+                text = category,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium
             )
@@ -110,22 +102,9 @@ fun CategoryProgressRow(
         }
         LinearProgressIndicator(
             progress = { fraction },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp),
+            modifier = Modifier.fillMaxWidth().height(8.dp),
             color = color,
             trackColor = color.copy(alpha = 0.15f)
         )
-    }
-}
-
-fun categoryColor(category: String): Color {
-    return when (category) {
-        "Food & Drinks" -> Color(0xFFE64A19)
-        "Travel & Fuel" -> Color(0xFF1976D2)
-        "Groceries" -> Color(0xFF388E3C)
-        "Bills & Utilities" -> Color(0xFFF57C00)
-        "Shopping" -> Color(0xFF7B1FA2)
-        else -> Color(0xFF546E7A)
     }
 }

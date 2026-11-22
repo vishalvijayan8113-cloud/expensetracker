@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -13,16 +12,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -43,9 +37,7 @@ fun QuickExpensePopup(
     var note by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("Other") }
     val focusRequester = remember { FocusRequester() }
-    val keyboard = LocalSoftwareKeyboardController.current
 
-    // Auto-categorize as user types
     LaunchedEffect(note) {
         if (note.isNotBlank()) {
             selectedCategory = CategoryMapper.categorize(note)
@@ -75,16 +67,13 @@ fun QuickExpensePopup(
                     .fillMaxWidth(0.92f)
                     .wrapContentHeight(),
                 shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 16.dp)
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Header row
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -112,7 +101,6 @@ fun QuickExpensePopup(
 
                     HorizontalDivider()
 
-                    // Note input
                     OutlinedTextField(
                         value = note,
                         onValueChange = { note = it },
@@ -123,25 +111,18 @@ fun QuickExpensePopup(
                         placeholder = { Text("e.g., water, petrol, grocery...") },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(
-                            capitalization = KeyboardCapitalization.Sentences,
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onDone = {
-                                keyboard?.hide()
-                            }
+                            capitalization = KeyboardCapitalization.Sentences
                         ),
                         shape = RoundedCornerShape(12.dp)
                     )
 
-                    // Auto-category indicator
                     if (note.isNotBlank()) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(
-                                text = "Auto-detected:",
+                                text = "Category:",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -150,7 +131,7 @@ fun QuickExpensePopup(
                                 color = MaterialTheme.colorScheme.primaryContainer
                             ) {
                                 Text(
-                                    text = "${CategoryMapper.categoryIcon(selectedCategory)} $selectedCategory",
+                                    text = selectedCategory,
                                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                                     style = MaterialTheme.typography.labelMedium,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -159,26 +140,13 @@ fun QuickExpensePopup(
                         }
                     }
 
-                    // Category chips
-                    Text(
-                        text = "Or select category:",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(CategoryMapper.allCategories) { cat ->
                             val isSelected = cat == selectedCategory
                             FilterChip(
                                 selected = isSelected,
                                 onClick = { selectedCategory = cat },
-                                label = {
-                                    Text(
-                                        text = "${CategoryMapper.categoryIcon(cat)} $cat",
-                                        fontSize = 12.sp
-                                    )
-                                },
+                                label = { Text(cat, fontSize = 12.sp) },
                                 colors = FilterChipDefaults.filterChipColors(
                                     selectedContainerColor = MaterialTheme.colorScheme.primary,
                                     selectedLabelColor = Color.White
@@ -187,7 +155,6 @@ fun QuickExpensePopup(
                         }
                     }
 
-                    // Action buttons
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -196,9 +163,7 @@ fun QuickExpensePopup(
                             onClick = onDismiss,
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text("Ignore")
-                        }
+                        ) { Text("Ignore") }
                         Button(
                             onClick = {
                                 if (note.isNotBlank()) {
@@ -215,9 +180,7 @@ fun QuickExpensePopup(
                             modifier = Modifier.weight(1f),
                             shape = RoundedCornerShape(12.dp),
                             enabled = note.isNotBlank()
-                        ) {
-                            Text("Save")
-                        }
+                        ) { Text("Save") }
                     }
                 }
             }

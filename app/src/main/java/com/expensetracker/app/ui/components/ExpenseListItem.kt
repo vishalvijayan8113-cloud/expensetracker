@@ -19,7 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.expensetracker.app.data.db.Expense
-import com.expensetracker.app.utils.CategoryMapper
 import com.expensetracker.app.utils.DateUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,7 +82,6 @@ fun ExpenseCard(expense: Expense, onEdit: (Expense) -> Unit) {
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Category icon circle
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -92,8 +90,10 @@ fun ExpenseCard(expense: Expense, onEdit: (Expense) -> Unit) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = CategoryMapper.categoryIcon(expense.category),
-                    fontSize = 22.sp
+                    text = categoryInitial(expense.category),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = categoryColor(expense.category)
                 )
             }
 
@@ -160,4 +160,22 @@ fun ExpenseCard(expense: Expense, onEdit: (Expense) -> Unit) {
             }
         }
     }
+}
+
+fun categoryColor(category: String): Color = when (category) {
+    "Food & Drinks"    -> Color(0xFFE64A19)
+    "Travel & Fuel"    -> Color(0xFF1976D2)
+    "Groceries"        -> Color(0xFF388E3C)
+    "Bills & Utilities"-> Color(0xFFF57C00)
+    "Shopping"         -> Color(0xFF7B1FA2)
+    else               -> Color(0xFF546E7A)
+}
+
+fun categoryInitial(category: String): String = when (category) {
+    "Food & Drinks"    -> "F"
+    "Travel & Fuel"    -> "T"
+    "Groceries"        -> "G"
+    "Bills & Utilities"-> "B"
+    "Shopping"         -> "S"
+    else               -> "O"
 }
